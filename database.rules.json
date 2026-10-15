@@ -1,0 +1,54 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "subscribers": {
+      ".read": "auth.token.email === 'abmen@gmail.com'",
+      ".write": "auth.token.email === 'abmen@gmail.com'"
+    },
+    "userSubs": {
+      "$uid": {
+        ".read": "auth.uid === $uid || auth.token.email === 'abmen@gmail.com'",
+        ".write": "auth.token.email === 'abmen@gmail.com'"
+      }
+    },
+    "users": {
+      ".read": "auth.token.email === 'abmen@gmail.com'",
+      "$uid": {
+        ".read": "auth.uid === $uid",
+        ".write": "auth.token.email === 'abmen@gmail.com'",
+        "email": {
+          ".write": "auth.uid === $uid && !data.exists()"
+        },
+        "name": {
+          ".write": "auth.uid === $uid && !data.exists()"
+        },
+        "created": {
+          ".write": "auth.uid === $uid && !data.exists()"
+        },
+        "last": {
+          ".write": "auth.uid === $uid"
+        },
+        "username": {
+          ".write": "auth.uid === $uid && !data.exists()"
+        }
+      }
+    },
+    "chats": {
+      "$uid": {
+        ".read": "auth.token.email === 'abmen@gmail.com' || (auth.uid === $uid && !root.child('users/' + $uid + '/banned').val())",
+        ".write": "auth.token.email === 'abmen@gmail.com' || (auth.uid === $uid && !root.child('users/' + $uid + '/banned').val())",
+        "$m": {
+          ".validate": "newData.hasChildren(['from','t','ts']) && newData.child('t').val().length <= 500 && (auth.token.email === 'abmen@gmail.com' || newData.child('from').val() === 'u')"
+        }
+      }
+    },
+    "usernames": {
+      "$n": {
+        ".read": true,
+        ".validate": "$n.matches(/^[a-z0-9_]{3,20}$/) && newData.isString()",
+        ".write": "auth.token.email === 'abmen@gmail.com' || (auth != null && (!data.exists() || data.val() === auth.uid) && newData.val() === auth.uid)"
+      }
+    }
+  }
+}
