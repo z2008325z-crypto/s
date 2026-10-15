@@ -37,7 +37,7 @@ const R=()=>sess&&(sess.email||"").toLowerCase()===ADMIN?"a":"u";
 const saveSess=()=>store.set("axel_sess",JSON.stringify(sess));
 const AUTH="https://identitytoolkit.googleapis.com/v1/accounts:";
 const REFRESH_URL="https://securetoken.googleapis.com/v1/token?key="+FB.apiKey;
-let subs={},users={},mine=null,prof=null,peer=null,poll=null,mode="in";
+let chatKeys={},subs={},users={},mine=null,prof=null,peer=null,poll=null,mode="in";
 async function token(){
   if(!sess)throw new Error("auth");
   if(Date.now()<sess.exp-60000)return sess.id;
@@ -105,7 +105,7 @@ const clean=s=>{const c={...s};delete c.dirty;return c};
 const pub=c=>({un:c.un||"",upd:c.upd||0,id:c.id,name:c.name,phone:c.phone||"",plan:c.plan,kind:c.kind||"",exp:c.exp,from:c.from||c.date||"",date:c.date||""});
 async function fb(path,method,body){
   const t=await token();
-  const r=await fetch(`${FB.url}/${path}.json?auth=${encodeURIComponent(t)}`,{method:method||"GET",body:body!==undefined?JSON.stringify(body):undefined});
+  const [pp,qq]=path.split("?");const r=await fetch(`${FB.url}/${pp}.json?${qq?qq+"&":""}auth=${encodeURIComponent(t)}`,{method:method||"GET",body:body!==undefined?JSON.stringify(body):undefined});
   if(!r.ok)throw new Error(r.status);return r.json();
 }
 async function push(id){const c=subs[id];await fb("subscribers/"+id,"PUT",clean(c));if(c.uid)await fb("userSubs/"+c.uid,"PUT",pub(c));delete c.dirty}
@@ -118,7 +118,7 @@ async function sync(){
       const remote=(await fb("subscribers"))||{};
       for(const id in remote)subs[id]=remote[id];
       for(const id in subs)if(!(id in remote))await push(id);
-      users=(await fb("users"))||{};persist();
+      users=(await fb("users"))||{};try{chatKeys=(await fb("chats?shallow=true"))||{}}catch(e){}persist();
     }else{
       prof=(await fb("users/"+sess.uid))||{};
       mine=await fb("userSubs/"+sess.uid);
@@ -132,7 +132,7 @@ setInterval(()=>{if(isIn())sync()},60000);
 
 /* render */
 function renderAll(){
-  if(R()==="a"){renderHome();renderList();renderUsers()}else renderMine();
+  if(R()==="a"){renderHome();renderList();renderUsers()}else{renderMine();$("#whoUn").textContent=prof&&prof.username?"@"+prof.username:""}
   renderPlans();if(!$("#chat").hidden)renderChat();
 }
 function renderHome(){
@@ -175,7 +175,7 @@ function renderMine(){
   const c=mine,el=$("#mineBox");
   if(!c||!c.plan||!c.exp){el.innerHTML='<div class="card stack"><div class="empty">لا يوجد اشتراك حاليا</div><a class="btn main" href="#prices">اشترك الآن</a></div>';return}
   const p=plan(c.plan),s=state(c),l=Math.max(left(c),0);
-  el.innerHTML=`<div class="card stack"><div class="ch"><div><b>${esc(c.name)}</b><span class="ph">${esc(c.kind||"")}</span></div><span class="st ${s}">${LBL[s]}</span></div>
+  el.innerHTML=`<div class="card stack"><div class="ch"><div><b>${esc(c.name)}</b><span class="ph">${esc(c.kind||"")}</span><small class="mut">@${esc((prof&&prof.username)||c.un||"")}</small></div><span class="st ${s}">${LBL[s]}</span></div>
 ${s==="exp"?"":`<div class="okBanner">تم الاشتراك في باقة ${p.name}</div>`}<div class="dayBox"><b class="num big">${l}</b><small class="mut">يوم متبقي - ${dtxt(c)}</small></div>
 <div class="cm"><span class="badge">${p.n} - ${p.name}</span><span>من ${esc(c.from||c.date||"-")}</span><span>إلى ${esc(c.exp)}</span></div>
 <div class="meter"><span>المعالج</span><div class="track"><div class="fill" style="width:${p.cpu/2}%"></div></div><b class="num">${p.cpu}%</b></div>
@@ -229,7 +229,7 @@ function renderChat(){
   const a=R()==="a";
   $("#chatList").hidden=!a||!!peer;$("#thread").hidden=a&&!peer;
   if(a&&!peer){
-    const l=Object.entries(users).filter(([u,x])=>x.last&&(x.email||"").toLowerCase()!==ADMIN).sort((p,q)=>(q[1].last||0)-(p[1].last||0));
+    const l=Object.entries(users).filter(([u,x])=>(x.last||chatKeys[u])&&(x.email||"").toLowerCase()!==ADMIN).sort((p,q)=>(q[1].last||0)-(p[1].last||0));
     $("#chatList").innerHTML=l.length?l.map(([u,x])=>`<div class="card mini"><div data-act="open" data-id="${u}" class="grow"><b>@${esc(x.username||"-")}</b><small>${esc(x.name||"")}${x.banned?" - محظور":""} - ${new Date(x.last).toLocaleString("ar-EG",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div></div>`).join(""):'<div class="empty">لا توجد رسائل من المستخدمين</div>';
   }else{
     const x=users[peer]||{};
@@ -237,12 +237,12 @@ function renderChat(){
   }
 }
 async function tick(){
-  if(R()==="a"&&!peer){try{users=(await fb("users"))||{};renderChat()}catch(e){}}else loadMsgs();
+  if(R()==="a"&&!peer){try{users=(await fb("users"))||{};try{chatKeys=(await fb("chats?shallow=true"))||{}}catch(e){}renderChat()}catch(e){}}else loadMsgs();
 }
 function openThread(u){peer=u;$("#msgs").dataset.n="";if(location.hash==="#chat")route();else location.hash="#chat"}
 $("#chatForm").addEventListener("submit",async e=>{
   e.preventDefault();const i=$("#chatIn"),t=i.value.trim().slice(0,500),u=myUid();if(!t||!u)return;i.value="";
-  try{const ts=Date.now();await fb("chats/"+u,"POST",{from:R(),t,ts});if(R()==="u")await fb("users/"+u,"PATCH",{last:ts})}catch(x){toast("تعذر الإرسال");i.value=t}
+  try{const ts=Date.now();await fb("chats/"+u,"POST",{from:R(),t,ts});if(R()==="u")try{await fb("users/"+u,"PATCH",{last:ts})}catch(y){}}catch(x){toast("تعذر الإرسال ("+x.message+")");i.value=t}
   loadMsgs();
 });
 async function ban(u){

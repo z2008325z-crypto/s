@@ -35,6 +35,7 @@
       }
     },
     "chats": {
+      ".read": "auth.token.email === 'abmen@gmail.com'",
       "$uid": {
         ".read": "auth.token.email === 'abmen@gmail.com' || (auth.uid === $uid && !root.child('users/' + $uid + '/banned').val())",
         ".write": "auth.token.email === 'abmen@gmail.com' || (auth.uid === $uid && !root.child('users/' + $uid + '/banned').val())",
