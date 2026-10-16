@@ -1,177 +1,70 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AXEL Hosting</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b10">
+  <meta name="description" content="NEXUS — مساعد ذكاء اصطناعي يعمل محليًا داخل المتصفح">
+  <title>NEXUS AI — محلي</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
-<section id="login" class="center">
-  <button class="icon themeBtn corner"></button>
-  <div class="lock"><span data-i="lock"></span></div>
-  <h1>AXEL</h1>
-  <p class="mut">سجل الدخول أو أنشئ حساب جديد</p>
-  <form id="loginForm" class="stack">
-    <input id="nm" placeholder="الاسم" hidden>
-    <input id="un" placeholder="اسم المستخدم (إنجليزي ولا يتكرر)" dir="ltr" autocapitalize="none" hidden>
-    <input id="em" type="email" placeholder="البريد الإلكتروني" autocomplete="username" dir="ltr">
-    <input id="pw" type="password" placeholder="كلمة المرور" autocomplete="current-password" dir="ltr">
-    <p id="loginErr" class="err"></p>
-    <button class="btn main" id="loginBtn" type="submit">دخول</button>
-    <button class="btn" id="swMode" type="button">ليس لديك حساب؟ أنشئ حساب</button>
-  </form>
-</section>
-
-<section id="banned" class="center" hidden>
-  <div class="lock"><span data-i="ban"></span></div>
-  <h1>تم حظر حسابك</h1>
-  <p class="mut">تواصل مع الدعم لمعرفة السبب.</p>
-  <a class="btn" id="banWa" target="_blank" rel="noopener">واتساب الدعم</a>
-  <button class="btn" id="banOut">تسجيل الخروج</button>
-</section>
-
-<main id="app" hidden>
-  <header class="top"><b id="title"></b><button class="icon themeBtn"></button></header>
-
-  <!-- admin: dashboard -->
-  <section id="home" class="view" hidden>
-    <div class="stats">
-      <div class="card"><small>العملاء</small><b class="num" id="stTotal">0</b></div>
-      <div class="card"><small>النشطين</small><b class="num" id="stActive">0</b></div>
-      <div class="card"><small>ينتهون قريبا</small><b class="num" id="stSoon">0</b></div>
-      <div class="card"><small>المنتهية</small><b class="num" id="stExp">0</b></div>
-    </div>
-    <div class="card rev"><small>الدخل الشهري المتوقع</small><div><b class="num big" id="stRev">0</b><span class="mut"> ج.م</span></div></div>
-    <h3>تحتاج متابعة</h3>
-    <div id="watch"></div>
-    <h3>توزيع الباقات</h3>
-    <div class="card" id="dist"></div>
-  </section>
-
-  <!-- user: my subscription -->
-  <section id="mine" class="view" hidden><div id="mineBox"></div></section>
-
-  <!-- admin: customers -->
-  <section id="customers" class="view" hidden>
-    <input id="search" class="search" placeholder="بحث بالاسم أو الرقم">
-    <div class="row">
-      <select id="fPlan"></select>
-      <select id="fSt"><option value="">كل الحالات</option><option value="ok">نشط</option><option value="soon">قريب الانتهاء</option><option value="exp">منتهي</option></select>
-    </div>
-    <div id="list"></div>
-  </section>
-
-  <!-- admin: users panel -->
-  <section id="panel" class="view" hidden>
-    <input id="usearch" class="search" placeholder="بحث باليوزر نيم أو الاسم">
-    <div id="ulist"></div>
-  </section>
-
-  <section id="prices" class="view" hidden>
-    <p class="mut lead">استضافة بوتات تيليجرام وواتساب. سيرفرات سريعة ومستقرة، اشتراك شهري ودعم فني مستمر.</p>
-    <div id="plans"></div>
-    <div class="card"><h3>مناسبة لـ</h3><ul class="ticks"><li>بوتات واتساب</li><li>بوتات تيليجرام</li><li>مشاريع Node.js</li></ul></div>
-  </section>
-
-  <!-- chat: admin sees users list then thread; user sees thread -->
-  <section id="chat" class="view" hidden>
-    <div id="chatList"></div>
-    <div id="thread" hidden>
-      <div class="thHead"><button class="icon" id="back" data-act="back" hidden>‹</button><b id="thName"></b></div>
-      <div id="msgs" class="msgs"></div>
-      <form id="chatForm" class="chatForm"><input id="chatIn" placeholder="اكتب رسالتك" maxlength="500" autocomplete="off"><button class="btn main" type="submit"><span data-i="send"></span></button></form>
-    </div>
-  </section>
-
-  <section id="settings" class="view" hidden>
-    <div class="card stack">
-      <h3>الحساب</h3>
-      <p class="mut" id="who"></p>
-      <p class="mut" id="whoUn"></p>
-      <p class="mut">حالة المزامنة: <b id="net"></b></p>
-      <button class="btn" id="logout"><span data-i="out"></span>تسجيل الخروج</button>
-    </div>
-    <div class="card stack" data-r="a">
-      <h3>نسخة احتياطية</h3>
-      <button class="btn" id="exportBtn"><span data-i="copy"></span>نسخ كل البيانات</button>
-      <textarea id="restoreTxt" placeholder="الصق هنا نسخة البيانات للاستعادة" dir="ltr"></textarea>
-      <button class="btn main" id="restoreBtn">استعادة البيانات</button>
-    </div>
-  </section>
-
-  <button class="fab" id="fab" hidden><span data-i="plus"></span></button>
-  <nav class="tabs">
-    <a href="#home" data-v="home" data-r="a"><span data-i="home"></span>الرئيسية</a>
-    <a href="#mine" data-v="mine" data-r="u"><span data-i="home"></span>اشتراكي</a>
-    <a href="#customers" data-v="customers" data-r="a"><span data-i="users"></span>العملاء</a>
-    <a href="#panel" data-v="panel" data-r="a"><span data-i="lock"></span>الأدمن</a>
-    <a href="#prices" data-v="prices"><span data-i="tag"></span>الباقات</a>
-    <a href="#chat" data-v="chat"><span data-i="chat"></span>الدردشة</a>
-    <a href="#settings" data-v="settings"><span data-i="gear"></span>الإعدادات</a>
-  </nav>
-</main>
-
-<!-- admin: customer form -->
-<div id="sheet" class="sheet" hidden>
-  <form id="cForm" class="panel stack">
-    <h3 id="formTitle">عميل جديد</h3>
-    <input id="cName" placeholder="اسم العميل" required>
-    <input id="cPhone" type="tel" placeholder="رقم الهاتف" dir="ltr">
-    <input id="cUn" placeholder="يوزر نيم المستخدم (لازم)" dir="ltr" autocapitalize="none" required>
-    <div class="row"><select id="cPlan"></select><select id="cKind"></select></div>
-    <label class="mut">آخر يوم في الاشتراك (يُحسب هذا اليوم ضمن الاشتراك)<input id="cExp" type="date"></label>
-    <textarea id="cNote" placeholder="ملاحظات (اسم البوت، معلومات إضافية)"></textarea>
-    <div class="row"><button class="btn main" type="submit">حفظ</button><button class="btn" type="button" id="cCancel">إلغاء</button></div>
-  </form>
-</div>
-
-<!-- user: payment -->
-<div id="paySheet" class="sheet" hidden>
-  <div class="panel stack">
-    <h3>الاشتراك في <span id="payPlan"></span></h3>
-    <div class="card">
-      <small class="mut">حوّل المبلغ عبر فودافون كاش إلى</small>
-      <b class="num big" dir="ltr" id="payNum">01035880919</b>
-      <span class="mut">رقم كاش - استضافة AXEL</span>
-      <button class="btn" id="payCopy"><span data-i="copy"></span>نسخ الرقم</button>
-    </div>
-    <div class="shots" id="payShots"></div>
-    <small class="mut">الصور توضيحية لخطوات التحويل.</small>
-    <button class="btn main" id="payDone">تم إرسال المال</button>
-    <button class="btn" id="payCancel">إغلاق</button>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">N</div><div><strong>NEXUS</strong><small>LOCAL AI</small></div></div>
+      <div class="side-caption">مساحة العمل</div>
+      <button class="side-item active" id="newChatBtn"><span>＋</span> محادثة جديدة</button>
+      <div class="side-note">
+        <span class="pulse"></span>
+        <div><b>الاستدلال المحلي</b><small>المعالجة على جهازك</small></div>
+      </div>
+      <div class="side-footer">لا يحتاج مفتاح API<br>أول تشغيل يحتاج تنزيل النموذج.</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark">N</span><b>NEXUS</b></div>
+        <div class="model-status"><span class="status-dot" id="statusDot"></span><span id="statusText">النموذج لم يُحمّل بعد</span></div>
+        <button class="icon-btn" id="settingsBtn" title="الإعدادات" aria-label="الإعدادات">⚙</button>
+      </header>
+      <section class="chat-area" id="chatArea">
+        <div class="welcome" id="welcome">
+          <div class="hero-orb"><div class="orb-inner">N</div></div>
+          <div class="eyebrow">PRIVATE • ON-DEVICE • NO API KEY</div>
+          <h1>ذكاء اصطناعي، <span>على جهازك.</span></h1>
+          <p>حمّل النموذج المفتوح الأوزان ثم ابدأ المحادثة. لا تُرسل رسائلك إلى خادم محادثات.</p>
+          <div class="load-panel">
+            <div class="load-panel-icon">⌁</div>
+            <div class="load-panel-copy"><b id="loadTitle">جاهز لتهيئة النموذج</b><small id="loadSub">قد يستغرق التنزيل الأول وقتًا ويستهلك مساحة وبيانات.</small></div>
+            <button class="primary-btn" id="loadBtn">تحميل النموذج</button>
+          </div>
+          <div class="feature-row">
+            <div><span>◈</span><b>محلي</b><small>التوليد على الجهاز</small></div>
+            <div><span>⌘</span><b>مفتوح الأوزان</b><small>Qwen 2.5 — 0.5B</small></div>
+            <div><span>↯</span><b>بدون API</b><small>لا مفتاح مدفوع</small></div>
+          </div>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </section>
+      <footer class="composer-wrap">
+        <div class="composer">
+          <textarea id="promptInput" rows="1" placeholder="اكتب رسالتك هنا..." aria-label="اكتب رسالتك"></textarea>
+          <button id="sendBtn" class="send-btn" aria-label="إرسال" disabled>↑</button>
+        </div>
+        <div class="composer-meta"><span id="composerStatus">حمّل النموذج أولًا لبدء المحادثة</span><span>تأكد من مراجعة مخرجات النموذج</span></div>
+      </footer>
+    </main>
   </div>
-</div>
-
-<div id="invSheet" class="sheet" hidden>
-  <div class="panel stack">
-    <h3>الفاتورة</h3>
-    <img id="invImg" class="invImg" alt="invoice">
-    <a class="btn main" id="invDl" download="AXEL-invoice.png">حفظ الصورة</a>
-    <button class="btn" id="invShare">مشاركة</button>
-    <small class="mut">لو الحفظ ما اشتغل اضغط مطولا على الصورة واختر حفظ.</small>
-    <button class="btn" id="invClose">إغلاق</button>
+  <div class="modal-backdrop hidden" id="settingsModal">
+    <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-head"><h2 id="settingsTitle">إعدادات النموذج</h2><button class="icon-btn" id="closeSettings" aria-label="إغلاق">×</button></div>
+      <label for="maxTokens">أقصى طول للإجابة <span id="tokenValue">256</span></label>
+      <input id="maxTokens" type="range" min="64" max="512" step="32" value="256">
+      <label for="temperature">درجة العشوائية <span id="tempValue">0.7</span></label>
+      <input id="temperature" type="range" min="0.1" max="1.2" step="0.1" value="0.7">
+      <p>تغيير الإعدادات لا يغيّر أوزان النموذج. النموذج قد يرفض بعض الطلبات بسبب تدريبه الأصلي؛ لا يوجد ضمان أن يجيب عن كل شيء.</p>
+      <button class="primary-btn full" id="clearBtn">مسح المحادثة الحالية</button>
+    </section>
   </div>
-</div>
-<div id="noteSheet" class="sheet" hidden>
-  <div class="panel stack">
-    <h3>اشتراكك</h3>
-    <p id="noteTxt" class="lead"></p>
-    <button class="btn main" id="noteOk">تمام</button>
-  </div>
-</div>
-<div id="unSheet" class="sheet" hidden>
-  <div class="panel stack">
-    <h3>اختر اسم مستخدم</h3>
-    <p class="mut">لازم يوزر نيم فريد عشان الأدمن يربط اشتراكك بحسابك.</p>
-    <input id="unIn" placeholder="مثال: ahmed_12" dir="ltr" autocapitalize="none">
-    <p id="unErr" class="err"></p>
-    <button class="btn main" id="unSave">حفظ</button>
-  </div>
-</div>
-<div id="toast" class="toast" hidden></div>
-<script src="script.js"></script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
